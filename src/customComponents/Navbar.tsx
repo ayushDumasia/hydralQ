@@ -1,10 +1,9 @@
-import { Button } from '@/components/ui/button';
 import React from 'react';
 import CustomLink from './common/CustomLink';
 
 const Navbar: React.FC = () => {
   return (
-    <nav className='flex items-center justify-between p-4 bg-white shadow-md'>
+    <nav className='flex items-center justify-between p-4 bg-transparent shadow-md'>
       <div className='flex items-center space-x-4'>
         <CustomLink to='/'>Home</CustomLink>
         <CustomLink to='/chat'>ChatBot</CustomLink>
@@ -12,8 +11,15 @@ const Navbar: React.FC = () => {
       </div>
 
       <div className='flex items-center space-x-2'>
-        <Button variant='outline'>Sign In</Button>
-        <Button className='bg-[#161D6F]'>Sign Up</Button>
+        <CustomLink to='/sign-in' className='p-2 rounded-md'>
+          Sign In
+        </CustomLink>
+        <CustomLink
+          to='/sign-up'
+          className='p-2 rounded-md bg-extend-secondaryAzure hover:text-extend-backgroundWhite text-extend-backgroundLight'
+        >
+          Sign Up
+        </CustomLink>
       </div>
     </nav>
   );
