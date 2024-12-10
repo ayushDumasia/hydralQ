@@ -11,9 +11,13 @@ import { Label } from '@/components/ui/label';
 import { auth, googleProvider } from '@/firebase/firebaseConfig';
 import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useCookies } from 'react-cookie';
+import { Link, useNavigate } from 'react-router-dom';
 
 export function LoginForm() {
+  const [cookies, setCookie] = useCookies(['user']);
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -49,9 +53,17 @@ export function LoginForm() {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
+      console.log(user);
       console.log('Google signed-in user:', user);
+      setCookie('user', user.uid, {
+        path: '/',
+        expires: new Date(Date.now() + 604800000),
+      });
+      console.log(cookies);
+      navigate('/chat');
     } catch (err) {
       setError(err.message);
+      console.error('Error during Google sign-in:', err);
     }
   };
 

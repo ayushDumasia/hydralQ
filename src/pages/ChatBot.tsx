@@ -1,8 +1,11 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import DotsLoading from '@/customComponents/LoadingComponent/DotsLoading';
 import { MarkdownRenderer } from '@/customComponents/MarkDown';
 import { generatePDF } from '@/hooks/generate-pdf';
 import { cn } from '@/lib/utils';
+import axios from 'axios';
+// import { randomUUID } from 'crypto';
 import {
   ArrowDownToLine,
   Mic,
@@ -13,6 +16,11 @@ import {
 } from 'lucide-react';
 import MarkdownIt from 'markdown-it';
 import React, { useEffect, useRef, useState } from 'react';
+import { Cookies } from 'react-cookie';
+import { useNavigate } from 'react-router-dom';
+import { scroller } from 'react-scroll';
+import { v4 as uuidv4 } from 'uuid';
+
 import { useSpeechSynthesis } from 'react-speech-kit';
 
 interface MenuItem {
@@ -23,16 +31,34 @@ interface MenuItem {
 interface Message {
   sender: 'user' | 'bot';
   text: string;
+  loading?: boolean;
 }
 
 const Chatbot: React.FC = () => {
+  const navigate = useNavigate();
   const { speak } = useSpeechSynthesis();
+  const contentRef = useRef(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [userInput, setUserInput] = useState<string>('');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isListening, setIsListening] = useState<boolean>(false);
+
+  const randomUUID = uuidv4();
+
+  useEffect(() => {
+    // if (contentRef.current) {
+    //   console.log('I just did it , BITCH');
+    //   console.log(contentRef.current);
+    //   contentRef.current.scrollTop = contentRef.current.scrollHeight;
+    //   // contentRef.current.scrollIntoView({ behavior: 'smooth' });
+    // }
+    scroller.scrollTo('scroll-target', {
+      duration: 300,
+      smooth: true,
+      containerId: 'chat-container',
+    });
+  }, [messages]);
 
   const SpeechRecognition =
     (window as any).SpeechRecognition ||
@@ -41,60 +67,6 @@ const Chatbot: React.FC = () => {
 
   const markdownParser = new MarkdownIt();
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // Load initial messages
-  useEffect(() => {
-    setMessages([
-      { sender: 'user', text: 'Hello!' },
-      {
-        sender: 'bot',
-        text: 'Here is some **bold text** and a [link](https://example.com).',
-      },
-      {
-        sender: 'bot',
-        text: 'Code example:\n\n```js\nconsole.log("Hello world")\n```',
-      },
-      { sender: 'user', text: 'Can you show me a table?' },
-      {
-        sender: 'bot',
-        text: `# Markdown Test Content
-
-## Table of Contents
-1. [Introduction](#introduction)
-2. [Features of Markdown](#features-of-markdown)
-3. [Markdown Syntax](#markdown-syntax)
-    - [Headers](#headers)
-    - [Emphasis](#emphasis)
-    - [Lists](#lists)
-    - [Links and Images](#links-and-images)
-4. [Advanced Markdown](#advanced-markdown)
-    - [Blockquotes](#blockquotes)
-    - [Tables](#tables)
-    - [Code Blocks](#code-blocks)
-5. [Conclusion](#conclusion)
-
----
-
-## Introduction
-
-Markdown is a lightweight markup language that allows you to format plain text. It was created by John Gruber in 2004 with Aaron Swartz as a collaborator. Markdown is designed to be as easy to read and write as possible. It's commonly used in writing content for the web and is supported by many platforms such as GitHub, Reddit, and Stack Overflow.
-
-## Features of Markdown
-
-Markdown allows you to easily create formatted content without needing to use complex HTML tags. Some of its key features include:
-- Simplicity: Markdown syntax is easy to learn and read.
-- Portability: Markdown files can be converted into many formats, such as HTML and PDF.
-- Flexibility: Markdown can be extended with plugins or used in conjunction with other tools.
-
-## Markdown Syntax
-
-### Headers
-
-# Heading 1
-`,
-      },
-    ]);
-  }, []);
 
   const handleSpeakClick = (text: string) => {
     const plainText = markdownParser
@@ -111,24 +83,52 @@ Markdown allows you to easily create formatted content without needing to use co
     window.speechSynthesis.speak(utterance);
   };
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (userInput.trim() === '') return;
 
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      { sender: 'user', text: userInput },
-    ]);
+    const cookies = new Cookies();
+    const userCookie = cookies.get('user');
+
+    const userMessage = { sender: 'user', text: userInput };
+    const botMessage = { sender: 'bot', text: '', loading: true };
+
+    // const [cookies] = useCookies(['user']);
+
+    setMessages((prevMessages) => [...prevMessages, userMessage, botMessage]);
     setUserInput('');
 
-    setTimeout(() => {
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { sender: 'bot', text: `You said: "${userInput}"` },
-      ]);
-    }, 1000);
+    try {
+      const response = await axios.post(
+        `http://127.0.0.1:5000/chat/${randomUUID}`,
+        {
+          user_id: userCookie,
+          user_input: userInput,
+        },
+      );
+
+      const botReply = response.data;
+
+      setMessages((prevMessages) => {
+        const updatedMessages = [...prevMessages];
+        const botMessageIndex = updatedMessages.findIndex(
+          (msg) => msg.sender === 'bot' && msg.loading,
+        );
+
+        if (botMessageIndex !== -1) {
+          updatedMessages[botMessageIndex] = {
+            sender: 'bot',
+            text: botReply,
+            loading: false,
+          };
+        }
+
+        return updatedMessages;
+      });
+    } catch (error) {
+      console.error('Error with the API request:', error);
+    }
   };
 
-  // Handle speech-to-text toggle
   const toggleListening = () => {
     if (!recognition) {
       alert('Speech recognition is not supported in this browser.');
@@ -204,32 +204,44 @@ Markdown allows you to easily create formatted content without needing to use co
             : 'w-[calc(100%-25rem)] max-w-[1200px]',
         )}
       >
-        <div className='flex-1 p-6 space-y-4 h-[600px] overflow-y-auto'>
+        <div
+          className='flex-1 p-6 space-y-4 h-[600px] overflow-y-auto'
+          id='chat-container'
+          // ref={contentRef}
+        >
           {messages.map((message, index) => (
             <div
               key={index}
               className={`p-4 rounded-lg ${
                 message.sender === 'user'
                   ? 'bg-extend-accentIceBlue text-left'
-                  : 'bg-extend-backgroundLight text-left'
+                  : ' text-left'
               }`}
             >
-              <MarkdownRenderer markdown={message.text} />
-              {message.sender === 'bot' && (
-                <div className='flex mt-3 space-x-2'>
-                  <button
-                    className='w-5 h-5 text-gray-700 hover:text-gray-900'
-                    onClick={() => handleSpeakClick(message.text)}
-                  >
-                    <Volume2 size={20} />
-                  </button>
-                  <button
-                    className='w-5 h-5 text-gray-700 hover:text-gray-900'
-                    onClick={() => generatePDF(message.text)}
-                  >
-                    <ArrowDownToLine size={20} />
-                  </button>
+              {message.loading ? (
+                <div className='flex items-center align-middle w-[70px] bg-gray-600 rounded-bl-none pt-2 rounded-lg h-6 px-2 p-4 m-0'>
+                  <DotsLoading />
                 </div>
+              ) : (
+                <>
+                  {message.text && <MarkdownRenderer markdown={message.text} />}
+                  {message.sender === 'bot' && (
+                    <div className='flex mt-3 space-x-2'>
+                      <button
+                        className='w-5 h-5 text-gray-700 hover:text-gray-900'
+                        onClick={() => handleSpeakClick(message.text)}
+                      >
+                        <Volume2 size={20} />
+                      </button>
+                      <button
+                        className='w-5 h-5 text-gray-700 hover:text-gray-900'
+                        onClick={() => generatePDF(message.text)}
+                      >
+                        <ArrowDownToLine size={20} />
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           ))}

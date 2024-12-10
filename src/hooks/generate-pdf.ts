@@ -1,4 +1,3 @@
-import htmlToPdfmake from 'html-to-pdfmake';
 import { jsPDF } from 'jspdf';
 import { marked } from 'marked';
 
@@ -58,20 +57,14 @@ export const generatePDF = (text: string): void => {
   // doc.save('output.pdf');
 
   const htmlContent: string = marked(text);
-  const pdfmakeContent = htmlToPdfmake(htmlContent);
-  console.log(pdfmakeContent);
   const doc = new jsPDF('p', 'pt', 'a4');
-  doc.setFontSize(10);
-  doc.setFont('Helvetica', 'normal');
   doc.html(htmlContent, {
     callback: (doc) => {
       doc.save('output.pdf');
     },
-    x: 10,
-    y: 10,
+    x: 30,
+    y: 20,
     width: 800,
     windowWidth: 1000,
   });
-  // doc.text(htmlContent, 10, 10);
-  // doc.save('out.pdf');
 };

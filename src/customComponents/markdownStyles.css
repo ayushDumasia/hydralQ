@@ -24,3 +24,28 @@ p {
 pre {
   margin-bottom: 1em;
 }
+
+/* Styling for tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+}
+
+th,
+td {
+  border: 1px solid #ccc; /* Change the color as needed */
+  padding: 8px;
+  text-align: left;
+}
+
+/* Optional: Make table headers stand out */
+th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+}
+
+/* Optional: Add alternating row colors */
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
