@@ -47,6 +47,65 @@ const Chatbot: React.FC = () => {
   const randomUUID = uuidv4();
 
   useEffect(() => {
+    // console.log(process.env.FIREBASE_API_KEY);
+    setMessages([
+      // { sender: 'user', text: 'Hello!' },
+      // {
+      //   sender: 'bot',
+      //   text: 'Here is some **bold text** and a [link](https://example.com).',
+      // },
+      // {
+      //   sender: 'bot',
+      //   text: 'Code example:\n\n```js\nconsole.log("Hello world")\n```',
+      // },
+      { sender: 'user', text: 'Can you show me a table?' },
+      {
+        sender: 'bot',
+        text: `# Markdown Data for Testing
+
+## 1. Introduction
+This is a test of various Markdown syntax features.
+
+
+## 2. Lists
+
+### Ordered List:
+1. First item
+2. Second item
+   1. Sub-item 1
+   2. Sub-item 2
+
+### Unordered List:
+- Item 1
+- Item 2
+  - Sub-item 1
+  - Sub-item 2
+  - [x] Options
+
+---
+
+## 3. Text Formatting
+
+- **Bold**: This text is **bold**.
+- *Italic*: This text is *italic*.
+- ***Bold and Italic***: This text is ***bold and italic***.
+- ~~Strikethrough~~: This text has ~~strikethrough~~.
+
+---
+
+## 5. Code
+
+### Inline Code:
+greet("World");
+| Column 1    | Column 2    | Column 3    |
+|-------------|-------------|-------------|
+| Row 1 Cell  | Row 1 Cell  | Row 1 Cell  |
+| Row 2 Cell  | Row 2 Cell  | Row 2 Cell  |
+| Row 3 Cell  | Row 3 Cell  | Row 3 Cell  |
+
+`,
+      },
+    ]);
     // if (contentRef.current) {
     //   console.log('I just did it , BITCH');
     //   console.log(contentRef.current);
@@ -58,7 +117,7 @@ const Chatbot: React.FC = () => {
       smooth: true,
       containerId: 'chat-container',
     });
-  }, [messages]);
+  }, []);
 
   const SpeechRecognition =
     (window as any).SpeechRecognition ||

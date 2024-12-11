@@ -1,3 +1,12 @@
+/* General Text Styles */
+h1,
+h2,
+h3,
+p,
+li {
+  margin-bottom: 1em; /* Consistent spacing for elements */
+}
+
 h1 {
   font-size: 1.5em;
   font-weight: bold;
@@ -13,39 +22,67 @@ h3 {
   font-weight: bold;
 }
 
-h2 {
-  margin-bottom: 1em;
+/* List Styles */
+li,
+ol ul {
+  margin-bottom: 0.5em;
 }
 
+/* Paragraph Styles */
 p {
-  margin-bottom: 1em;
+  line-height: 1.5; /* Improves readability */
 }
 
+/* Link Styles */
+a {
+  color: blue;
+  /* text-decoration: underline; Enhances link visibility */
+}
+
+/* Image Styles */
+img {
+  display: block; /* Ensures proper alignment */
+  margin: 0.5em 0;
+}
+
+/* Horizontal Rule */
+hr {
+  margin: 1em 0;
+  border: none;
+  border-top: 1px solid #ccc; /* Subtle line style */
+}
+
+/* Preformatted Code Block */
 pre {
   margin-bottom: 1em;
+  padding: 1em;
+  background-color: #f9f9f9;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  overflow-x: auto; /* Handles long lines */
+  font-family: monospace; /* Consistent code styling */
 }
 
-/* Styling for tables */
+/* Table Styles */
 table {
   width: 100%;
   border-collapse: collapse;
   margin: 1em 0;
+  font-size: 0.9em; /* Slightly smaller font for tables */
 }
 
 th,
 td {
-  border: 1px solid #ccc; /* Change the color as needed */
+  border: 1px solid #ccc;
   padding: 8px;
   text-align: left;
 }
 
-/* Optional: Make table headers stand out */
 th {
   background-color: #f4f4f4;
   font-weight: bold;
 }
 
-/* Optional: Add alternating row colors */
 tr:nth-child(even) {
   background-color: #f9f9f9;
 }

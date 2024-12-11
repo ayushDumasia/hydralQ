@@ -58,6 +58,7 @@ export const generatePDF = (text: string): void => {
 
   const htmlContent: string = marked(text);
   const doc = new jsPDF('p', 'pt', 'a4');
+  doc.setFont('Arial', 'Normal');
   doc.html(htmlContent, {
     callback: (doc) => {
       doc.save('output.pdf');
